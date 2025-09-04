@@ -36,6 +36,7 @@ public class Route {
     private Category category;
 
     @OneToMany(mappedBy = "route")
+    @OrderColumn (name = "point_order")
     private List<Point>points;
 
     @OneToMany(mappedBy = "route")

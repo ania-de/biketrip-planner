@@ -25,6 +25,6 @@ public class User {
     @Min(value = 30, message = "Weight should be at least 30kg")
     private double weight;
 
-   // @ManyToMany
-    //private List<Route> routes;
+    @ManyToMany
+    private List<Route> routes;
 }
