@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,7 +25,9 @@ public class Route {
 @NotBlank(message = "City cannot be blank")
     private String city;
 @Min(0)
+@Column(name = "distance")
     private double distance;
+    @Column(name = "duration")
 @Min(0)
     private double duration;
 @NotNull(message = "Difficulty is required (easy/medium/hard)")
@@ -36,11 +39,11 @@ public class Route {
     private Category category;
 
     @OneToMany(mappedBy = "route")
-    @OrderColumn (name = "point_order")
-    private List<Point>points;
+    @OrderBy("id ASC")
+    private List<Point> points;
 
     @OneToMany(mappedBy = "route")
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -48,6 +51,6 @@ public class Route {
             joinColumns = @JoinColumn(name = "route_id"),
             inverseJoinColumns = @JoinColumn (name = "user_id")
     )
-    private List<User> users;
+    private List<User> users = new ArrayList<>();
 
 }

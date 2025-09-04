@@ -5,9 +5,16 @@ import com.biketrip.biketrip_planner.classes.Route;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PointRepository extends JpaRepository<Point, Long> {
-    List<Point> findByRoute(Route route);
 
-    List<Point> findPointsByRouteIdOrderByIdAsc(Long routeId);
+    List<Point> findByRouteOrderByOrderIndexAsc(Route route);
+
+
+    List<Point> findByRoute_IdOrderByOrderIndexAsc(Long routeId);
+
+    Optional<Point> findTopByRoute_IdOrderByOrderIndexDesc(Long routeId);
+
+    List<Point> id(Long id);
 }

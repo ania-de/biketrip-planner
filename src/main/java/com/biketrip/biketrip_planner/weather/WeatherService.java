@@ -1,5 +1,6 @@
 package com.biketrip.biketrip_planner.weather;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -24,7 +25,7 @@ public class WeatherService {
 
 
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Brak klucza OpenWeatherMap. Ustaw OWM_API_KEY w Environment variables albo app.owm.api-key.");
+            throw new IllegalStateException("Missing key of OpenWeatherMap. Set OWM_API_KEY w Environment variables or app.owm.api-key.");
         }
         this.owm = org.springframework.web.client.RestClient.builder().baseUrl(baseUrl).build();
         this.apiKey = apiKey;
@@ -70,4 +71,5 @@ public class WeatherService {
         if (s == null || s.isBlank()) return s;
         return s.substring(0,1).toUpperCase(Locale.ROOT) + s.substring(1);
     }
+
 }

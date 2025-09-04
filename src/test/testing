@@ -1,0 +1,30 @@
+
+ROUTES- post
+
+curl -i -X POST 'http://localhost:8080/routes' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Trasa 3",
+    "difficulty": "HARD",
+    "distance": 34,
+    "duration": 1.6,
+    "city": "Gdansk"
+  }'
+
+
+POGODA
+  curl "http://localhost:8080/api/weather?city=Krakow"
+
+KATEGORIE
+
+curl -X POST http://localhost:8080/categories -H "Content-Type: application/json" \
+  -d '{"name":"Miejska","description":"Miasto i bulwary"}'
+
+curl http://localhost:8080/categories
+
+UPDATE ROUTE
+curl -X PUT http://localhost:8080/routes/1 -H "Content-Type: application/json" \
+  -d '{"name":"Trasa 3 (upd)","difficulty":"HARD","distance":36,"duration":1.7,"city":"Gdansk","country":"Poland"}'
+
+REVIEWS/AVG
+curl http://localhost:8080/reviews/route/1/avg
