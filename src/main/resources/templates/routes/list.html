@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BikeTrip PLANNER </title>
+</head>
+<body>
+<h1>BikeTrip PLANNER </h1>
+
+<form th:action="@{/ui/routes}" method="get">
+    Miasto: <input name="city" th:value="${city}">
+    <button type="submit">Szukaj</button>
+</form>
+
+<h2>Utwórz trasę</h2>
+
+<form th:action="@{/ui/routes}" method="post">
+    Nazwa: <input name="name" required><br>
+    Miasto: <input name="city" required><br>
+    Trudność:
+    <select name="difficulty">
+        <option th:each="d : ${difficulties}" th:value="${d}" th:text="${d}"></option>
+    </select><br>
+    Dystans (km): <input type="number" step="0.1" name="distance" required><br>
+    Czas (min): <input type="number" step="1" name="durationMin" required><br>
+    Kategoria:
+    <select name="categoryId">
+        <option value="">Leśna</option>
+        <option value="">Szosa</option>
+        <option value="">Sportowa</option>
+        <option value="">Rekreacyjna</option>
+        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+    </select><br>
+    <button type="submit">Utwórz</button>
+</form>
+
+<p th:if="${ok}" th:text="${ok}" style="color:green;"></p>
+
+<h2>Trasy</h2>
+<table border="1" cellpadding="4">
+    <tr><th>ID</th><th>Nazwa</th><th>Miasto</th><th>Dystans</th><th>Min</th><th>Akcje</th></tr>
+    <tr th:each="r : ${routes}">
+        <td th:text="${r.id}"></td>
+        <td th:text="${r.name}"></td>
+        <td th:text="${r.city}"></td>
+        <td th:text="${r.distance}"></td>
+        <td th:text="${r.duration}"></td>
+        <td>
+            <a th:href="@{'/ui/routes/' + ${r.id}}">Szczegóły</a>
+            <form th:action="@{'/ui/routes/' + ${r.id} + '/delete'}" method="post" style="display:inline">
+                <button type="submit">Usuń</button>
+            </form>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

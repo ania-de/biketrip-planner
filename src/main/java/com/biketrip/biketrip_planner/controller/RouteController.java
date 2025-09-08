@@ -5,9 +5,12 @@ import com.biketrip.biketrip_planner.classes.Route;
 import com.biketrip.biketrip_planner.dto.DtoMapper;
 import com.biketrip.biketrip_planner.dto.RouteCreateRequest;
 import com.biketrip.biketrip_planner.dto.RouteDetailsResponse;
+import com.biketrip.biketrip_planner.dto.RouteWeatherResponse;
 import com.biketrip.biketrip_planner.service.CategoryService;
 import com.biketrip.biketrip_planner.service.ReviewService;
 import com.biketrip.biketrip_planner.service.RouteService;
+import com.biketrip.biketrip_planner.weather.WeatherDTO;
+import com.biketrip.biketrip_planner.weather.WeatherService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +26,18 @@ public class RouteController {
     private final RouteService routeService;
     private final CategoryService categoryService;
     private final ReviewService reviewService;
+    private final WeatherService weatherService;
 
-    public RouteController(RouteService routeService, CategoryService categoryService, ReviewService reviewService) {
+    public RouteController(RouteService routeService, CategoryService categoryService, ReviewService reviewService,WeatherService weatherService) {
         this.routeService = routeService;
         this.categoryService = categoryService;
         this.reviewService = reviewService;
+        this.weatherService = weatherService;
     }
 
     @PostMapping
-    public ResponseEntity<RouteDetailsResponse> create(@RequestBody @Valid RouteCreateRequest req) {
+    public ResponseEntity<?> create(@RequestBody @Valid RouteCreateRequest req,
+                                    @RequestParam(defaultValue = "false") boolean includeWeather) {
         Category category = null;
         if (req.categoryId() != null) {
             category = categoryService.findById(req.categoryId())
@@ -39,23 +45,52 @@ public class RouteController {
         }
         Route saved = routeService.createRoute(DtoMapper.fromCreate(req, category));
         double avg = reviewService.calculateAverageRating(saved.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(DtoMapper.toDetails(saved, avg));
+        RouteDetailsResponse details = DtoMapper.toDetails(saved, avg);
+
+        if (includeWeather) {
+            WeatherDTO w = weatherService.getCityWeather(saved.getCity());
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RouteWeatherResponse(details, w));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(details);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RouteDetailsResponse> get(@PathVariable Long id) {
+    public ResponseEntity<?> get(@PathVariable Long id,
+                                 @RequestParam(defaultValue = "false") boolean includeWeather) {
         return routeService.findById(id)
-                .map(r -> DtoMapper.toDetails(r, reviewService.calculateAverageRating(id)))
-                .map(ResponseEntity::ok)
+                .map(r -> {
+                    RouteDetailsResponse details = DtoMapper.toDetails(r, reviewService.calculateAverageRating(id));
+                    if (includeWeather) {
+                        WeatherDTO w = weatherService.getCityWeather(r.getCity());
+                        return ResponseEntity.ok(new RouteWeatherResponse(details, w));
+                    }
+                    return ResponseEntity.ok(details);
+                })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping
-    public List<RouteDetailsResponse> list(@RequestParam(required = false) String city) {
-        List<Route> routes = (city == null || city.isBlank()) ? routeService.findAll() : routeService.findByCity(city);
-        return routes.stream()
-                .map(r -> DtoMapper.toDetails(r, reviewService.calculateAverageRating(r.getId())))
-                .toList();
+    public ResponseEntity<?> list(@RequestParam(required = false) String city,
+                                  @RequestParam(defaultValue = "false") boolean includeWeather) {
+        List<Route> routes = (city == null || city.isBlank())
+                ? routeService.findAll()
+                : routeService.findByCity(city);
+
+        if (!includeWeather) {
+            var list = routes.stream()
+                    .map(r -> DtoMapper.toDetails(r, reviewService.calculateAverageRating(r.getId())))
+                    .toList();
+            return ResponseEntity.ok(list);
+        } else {
+            var list = routes.stream()
+                    .map(r -> {
+                        var details = DtoMapper.toDetails(r, reviewService.calculateAverageRating(r.getId()));
+                        var w = weatherService.getCityWeather(r.getCity());
+                        return new RouteWeatherResponse(details, w);
+                    })
+                    .toList();
+            return ResponseEntity.ok(list);
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -70,8 +105,8 @@ public class RouteController {
             r.setCity(in.getCity());
             r.setCountry(in.getCountry());
             r.setDifficulty(in.getDifficulty());
-            r.setDistance(in.getDistance());   // km
-            r.setDuration(in.getDuration());   // godz
+            r.setDistance(in.getDistance());
+            r.setDuration(in.getDuration());
             return ResponseEntity.ok(routeService.save(r));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }

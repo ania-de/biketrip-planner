@@ -62,8 +62,7 @@ public class WeatherService {
                 owmResp.name() != null ? owmResp.name() : capitalize(city),
                 owmResp.main().temp(),
                 owmResp.wind() != null ? owmResp.wind().speed() : 0.0,
-                w.description(),
-                w.icon()
+                w.description()
         );
     }
 

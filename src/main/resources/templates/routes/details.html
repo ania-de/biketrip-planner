@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trasa – szczegóły</title>
+</head>
+<body>
+<p><a th:href="@{/ui/routes}">&larr; Wróć do listy</a></p>
+
+<h1 th:text="${route.name}">Nazwa</h1>
+<p>
+    Miasto: <strong th:text="${route.city}">city</strong> |
+    Dystans: <strong th:text="${route.distance}">0</strong> km |
+    Czas: <strong th:text="${route.duration}">0</strong> min |
+    Trudność: <strong th:text="${route.difficulty}">EASY</strong>
+</p>
+
+<p th:if="${weather != null}">
+    <strong>Pogoda:</strong>
+    <span th:text="${weather.city}">Miasto</span> –
+    <span th:text="${#numbers.formatDecimal(weather.tempC,1,1)}">0.0</span> °C,
+    wiatr <span th:text="${#numbers.formatDecimal(weather.windMs,1,1)}">0.0</span> m/s,
+    <span th:text="${weather.description}">opis</span>
+</p>
+
+<p><strong>Średnia ocena:</strong> <span th:text="${avg}">0.0</span> / 5</p>
+
+<h2>Edytuj trasę</h2>
+<form th:action="@{'/ui/routes/' + ${route.id} + '/update'}" method="post">
+    Nazwa: <input name="name" th:value="${updateForm.name}" required><br>
+    Miasto: <input name="city" th:value="${updateForm.city}" required><br>
+    Trudność:
+    <select name="difficulty">
+        <option th:each="d : ${difficulties}"
+                th:value="${d}"
+                th:selected="${d} == ${updateForm.difficulty}"
+                th:text="${d}"></option>
+    </select><br>
+    Dystans (km): <input type="number" step="0.1" name="distance" th:value="${updateForm.distance}" required><br>
+    Czas (min): <input type="number" step="1" name="durationMin" th:value="${updateForm.durationMin}" required><br>
+    Kategoria:
+    <select name="categoryId">
+        <option value="">Leśna</option>
+        <option value="">Szosa</option>
+        <option value="">Sportowa</option>
+        <option value="">Rekreacyjna</option>
+        <option th:each="c : ${categories}"
+                th:value="${c.id}"
+                th:selected="${route.category != null} ? (${c.id} == ${route.category.id}) : false"
+                th:text="${c.name}"></option>
+    </select><br>
+    <button type="submit">Zapisz</button>
+</form>
+
+<form th:action="@{'/ui/routes/' + ${route.id} + '/delete'}" method="post" style="margin-top:10px">
+    <button type="submit">Usuń trasę</button>
+</form>
+<h2>Kalkulator kalorii</h2>
+<form th:action="@{'/ui/routes/' + ${route.id} + '/calories'}" method="post">
+    Waga [kg]:
+    <input type="number" step="0.5" min="30" name="weightKg"
+           th:value="${lastWeight != null} ? ${lastWeight} : ''" required>
+    <button type="submit">Policz</button>
+</form>
+
+<p th:if="${kcal != null}">
+    Szacowany wydatek energii: <strong th:text="${#numbers.formatDecimal(kcal,1,1)}">0.0</strong> kcal
+    <small>(MET=7.0, czas z trasy)</small>
+</p>
+
+<h2>Opinie</h2>
+<form th:action="@{'/ui/routes/' + ${route.id} + '/reviews'}" method="post">
+    Ocena (1–5): <input type="number" name="rating" min="1" max="5" required>
+    Treść: <input name="content" required>
+    <button type="submit">Dodaj opinię</button>
+</form>
+
+<ul>
+    <li th:each="rv : ${reviewList}">
+        <strong th:text="${rv.rating}">5</strong>/5 –
+        <span th:text="${rv.content}">Treść</span>
+    </li>
+</ul>
+
+<p th:if="${ok}" th:text="${ok}" style="color:green;"></p>
+</body>
+</html>

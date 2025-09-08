@@ -2,6 +2,8 @@ package com.biketrip.biketrip_planner.service;
 
 import com.biketrip.biketrip_planner.classes.Point;
 import com.biketrip.biketrip_planner.classes.Route;
+import com.biketrip.biketrip_planner.repository.PointRepository;
+import com.biketrip.biketrip_planner.repository.ReviewRepository;
 import com.biketrip.biketrip_planner.repository.RouteRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -19,18 +21,27 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final double DEFAULT_MET = 7.0 ;
+    private static final double MET = 7.0 ;
     @Value("${app.owm.api-key:}")
     private String apiKey;
 
 
-    public RouteService(RouteRepository routeRepository) {
+
+        private final ReviewRepository reviewRepository;
+        private final PointRepository pointRepository;
+
+    public RouteService(RouteRepository routeRepository, ReviewRepository reviewRepository, PointRepository pointRepository) {
         this.routeRepository = routeRepository;
+        this.reviewRepository = reviewRepository;
+        this.pointRepository = pointRepository;
     }
 
-    public double calculateCalories (Long routeId, double userWeight) {
-       Route route = routeRepository.findById(routeId).orElseThrow();
-        return DEFAULT_MET * userWeight * route.getDuration();
+    public double calculateCalories(Long routeId, double weightKg) {
+        Route r = routeRepository.findById(routeId).orElseThrow();
+        double minutes = Math.max(0, r.getDuration()); // w encji przechowujesz minuty
+        double hours = minutes / 60.0;
+        double kcal = MET * weightKg * hours;
+        return Math.round(kcal * 10.0) / 10.0;
     }
 
 
@@ -59,6 +70,9 @@ public class RouteService {
     }
 
     public void deleteById(Long id) {
+        if (!routeRepository.existsById(id)) return;
+        reviewRepository.deleteByRouteId(id);
+        pointRepository.deleteByRouteId(id);
         routeRepository.deleteById(id);
     }
 

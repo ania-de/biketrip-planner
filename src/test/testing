@@ -4,12 +4,32 @@ ROUTES- post
 curl -i -X POST 'http://localhost:8080/routes' \
   -H 'Content-Type: application/json' \
   -d '{
-    "name": "Trasa 3",
+    "name": "Trasa 5",
     "difficulty": "HARD",
-    "distance": 34,
-    "duration": 1.6,
-    "city": "Gdansk"
+    "distance":90,
+    "duration": 1.4,
+    "city": "Opole"
   }'
+
+
+  ROUTE z POGODĄ
+  curl -i -X POST 'http://localhost:8080/routes?includeWeather=true' \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "name": "Trasa 4",
+      "difficulty": "EASY",
+      "distance": 44,
+      "durationMin": 114,
+      "city": "Torun"
+    }'
+
+GET Z POGODĄ
+curl -i 'http://localhost:8080/routes/1?includeWeather=true'
+
+Lista z pogodą:
+curl -i 'http://localhost:8080/routes?includeWeather=true'
+
+
 
 
 POGODA
