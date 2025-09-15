@@ -23,28 +23,26 @@ public class PointService {
         this.routeRepository = routeRepository;
     }
 
-    public Point addPoint(@Valid Point point) {
+    public Point addPoint(Point point) {
         return pointRepository.save(point);
     }
 
     public List<Point> findByRoute(Route route) {
-        return pointRepository.findByRouteOrderByOrderIndexAsc(route);
+        return pointRepository.findByRouteOrderByIdAsc(route);
     }
 
     public List<Point> findPointsByRouteIdOrdered(Long routeId) {
-        return pointRepository.findByRoute_IdOrderByOrderIndexAsc(routeId);
+        return pointRepository.findByRoute_IdOrderByIdAsc(routeId);
     }
 
-    public Point addPointToRoute(Long routeId, @Valid Point newPoint) {
+    public Point addPointToRoute(Long routeId, Point newPoint) {
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new IllegalArgumentException("Route " + routeId + " not found"));
-        int nextOrder = pointRepository.findTopByRoute_IdOrderByOrderIndexDesc(routeId)
-                .map(p -> p.getOrderIndex() == null ? 0 : p.getOrderIndex() + 1)
-                .orElse(0);
         newPoint.setRoute(route);
-        if (newPoint.getOrderIndex() == null) {
-            newPoint.setOrderIndex(nextOrder);
-        }
         return pointRepository.save(newPoint);
+    }
+    public List<Point> findFirst10ByRouteId(Long routeId) {
+        List<Point> all = pointRepository.findByRoute_IdOrderByIdAsc(routeId);
+        return all.size() <= 10 ? all : all.subList(0, 10);
     }
 }

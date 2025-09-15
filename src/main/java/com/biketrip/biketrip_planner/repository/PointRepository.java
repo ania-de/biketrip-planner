@@ -12,16 +12,12 @@ import java.util.Optional;
 
 public interface PointRepository extends JpaRepository<Point, Long> {
 
-    List<Point> findByRouteOrderByOrderIndexAsc(Route route);
+
+    List<Point> findByRouteOrderByIdAsc(Route route);
 
 
-    List<Point> findByRoute_IdOrderByOrderIndexAsc(Long routeId);
+    List<Point> findByRoute_IdOrderByIdAsc(Long routeId);
 
-    Optional<Point> findTopByRoute_IdOrderByOrderIndexDesc(Long routeId);
 
-    List<Point> id(Long id);
-
-    @Modifying
-    @Query("delete from Point p where p.route.id = :routeId")
-    void deleteByRouteId(@Param("routeId") Long routeId);
+    long deleteByRoute_Id(Long routeId);
 }

@@ -20,8 +20,6 @@ public class WeatherService {
             @Value("${app.owm.base-url:https://api.openweathermap.org/data/2.5}") String baseUrl,
             @Value("${app.owm.api-key:}") String apiKey) {
 
-        System.out.println("DEBUG baseUrl=" + baseUrl);
-        System.out.println("DEBUG apiKey len=" + (apiKey == null ? "null" : apiKey.length()));
 
 
         if (apiKey == null || apiKey.isBlank()) {

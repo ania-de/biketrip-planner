@@ -3,15 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Trasa – szczegóły</title>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script defer src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: system-ui, Arial, sans-serif; line-height: 1.35; }
+        .topbar { display:flex; justify-content:flex-end; gap:.5rem; }
+        .map-wrap { display:flex; justify-content:center; margin: .5rem 0; }
+        #map { width: 420px; height: 420px; border:1px solid #ccc; border-radius:8px; }
+        .is-hidden { display:none; }
+        table { border-collapse: collapse; }
+        th, td { padding: .35rem .5rem; border: 1px solid #ccc; }
+        .section { margin: 1rem 0; }
+        .muted { color:#666; }
+        .btn { cursor:pointer; }
+    </style>
+
 </head>
 <body>
+
+<div class="topbar">
+    <form th:action="@{/ui/auth/logout}" method="post">
+        <span>Kliknij żeby się wylogować:</span>
+        <button type="submit" class="btn">Wyloguj</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+</div>
+
 <p><a th:href="@{/ui/routes}">&larr; Wróć do listy</a></p>
 
 <h1 th:text="${route.name}">Nazwa</h1>
+
 <p>
     Miasto: <strong th:text="${route.city}">city</strong> |
-    Dystans: <strong th:text="${route.distance}">0</strong> km |
-    Czas: <strong th:text="${route.duration}">0</strong> min |
+    Dystans: <strong th:text="${#numbers.formatDecimal(route.distance,1,1)}">0.0</strong> km |
+    Czas: <strong th:text="${#numbers.formatDecimal(route.duration,1,1)}">0.0</strong> min |
     Trudność: <strong th:text="${route.difficulty}">EASY</strong>
 </p>
 
@@ -23,65 +52,196 @@
     <span th:text="${weather.description}">opis</span>
 </p>
 
-<p><strong>Średnia ocena:</strong> <span th:text="${avg}">0.0</span> / 5</p>
-
-<h2>Edytuj trasę</h2>
-<form th:action="@{'/ui/routes/' + ${route.id} + '/update'}" method="post">
-    Nazwa: <input name="name" th:value="${updateForm.name}" required><br>
-    Miasto: <input name="city" th:value="${updateForm.city}" required><br>
-    Trudność:
-    <select name="difficulty">
-        <option th:each="d : ${difficulties}"
-                th:value="${d}"
-                th:selected="${d} == ${updateForm.difficulty}"
-                th:text="${d}"></option>
-    </select><br>
-    Dystans (km): <input type="number" step="0.1" name="distance" th:value="${updateForm.distance}" required><br>
-    Czas (min): <input type="number" step="1" name="durationMin" th:value="${updateForm.durationMin}" required><br>
-    Kategoria:
-    <select name="categoryId">
-        <option value="">Leśna</option>
-        <option value="">Szosa</option>
-        <option value="">Sportowa</option>
-        <option value="">Rekreacyjna</option>
-        <option th:each="c : ${categories}"
-                th:value="${c.id}"
-                th:selected="${route.category != null} ? (${c.id} == ${route.category.id}) : false"
-                th:text="${c.name}"></option>
-    </select><br>
-    <button type="submit">Zapisz</button>
-</form>
-
-<form th:action="@{'/ui/routes/' + ${route.id} + '/delete'}" method="post" style="margin-top:10px">
-    <button type="submit">Usuń trasę</button>
-</form>
-<h2>Kalkulator kalorii</h2>
-<form th:action="@{'/ui/routes/' + ${route.id} + '/calories'}" method="post">
-    Waga [kg]:
-    <input type="number" step="0.5" min="30" name="weightKg"
-           th:value="${lastWeight != null} ? ${lastWeight} : ''" required>
-    <button type="submit">Policz</button>
-</form>
-
-<p th:if="${kcal != null}">
-    Szacowany wydatek energii: <strong th:text="${#numbers.formatDecimal(kcal,1,1)}">0.0</strong> kcal
-    <small>(MET=7.0, czas z trasy)</small>
+<p><strong>Średnia ocena:</strong>
+    <span th:text="${#numbers.formatDecimal(avg,1,1)}">0.0</span> / 5
 </p>
 
-<h2>Opinie</h2>
-<form th:action="@{'/ui/routes/' + ${route.id} + '/reviews'}" method="post">
-    Ocena (1–5): <input type="number" name="rating" min="1" max="5" required>
-    Treść: <input name="content" required>
-    <button type="submit">Dodaj opinię</button>
-</form>
 
-<ul>
-    <li th:each="rv : ${reviewList}">
-        <strong th:text="${rv.rating}">5</strong>/5 –
-        <span th:text="${rv.content}">Treść</span>
-    </li>
-</ul>
+<div class="section">
+    <h2>Edytuj trasę</h2>
+    <form th:action="@{'/ui/routes/' + ${route.id} + '/update'}" method="post">
+        Nazwa: <input name="name" th:value="${updateForm.name}" required><br>
+        Miasto: <input name="city" th:value="${updateForm.city}" required><br>
+        Trudność:
+        <select name="difficulty">
+            <option th:each="d : ${difficulties}"
+                    th:value="${d}"
+                    th:selected="${d} == ${updateForm.difficulty}"
+                    th:text="${d}"></option>
+        </select><br>
+        Dystans (km): <input type="number" step="0.1" name="distance" th:value="${updateForm.distance}" required><br>
+        Czas (min): <input type="number" step="1" name="durationMin" th:value="${updateForm.durationMin}" required><br>
+        <button type="submit" class="btn">Zapisz</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+
+    <form th:action="@{'/ui/routes/' + ${route.id} + '/delete'}" method="post" style="margin-top:10px">
+        <button type="submit" class="btn" onclick="return confirm('Usunąć trasę?');">Usuń trasę</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+</div>
+
+
+<div class="section">
+    <h2>Kalkulator kalorii</h2>
+    <form th:action="@{'/ui/routes/' + ${route.id} + '/calories'}" method="post">
+        Waga [kg]:
+        <input type="number" step="0.5" min="30" name="weightKg"
+               th:value="${lastWeight != null} ? ${lastWeight} : ''" required>
+        <button type="submit" class="btn">Policz</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+
+    <p th:if="${kcal != null}">
+        Szacowane kalorie: <strong th:text="${#numbers.formatDecimal(kcal,1,1)}">0.0</strong> kcal
+    </p>
+</div>
+
+
+<div class="section">
+    <h2>Opinie</h2>
+    <form th:action="@{'/ui/routes/' + ${route.id} + '/reviews'}" method="post">
+        Ocena (1–5): <input type="number" name="rating" min="1" max="5" required>
+        Treść: <input name="content" required>
+        <button type="submit" class="btn">Dodaj opinię</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+    <ul>
+        <li th:each="rv : ${reviewList}">
+            <strong th:text="${rv.rating}">5</strong>/5 –
+            <span th:text="${rv.content}">Treść</span>
+        </li>
+    </ul>
+</div>
+
+
+<div class="section">
+    <h2>Punkty trasy</h2>
+    <form th:action="@{'/ui/routes/' + ${route.id} + '/points'}" method="post" style="margin-bottom:.5rem">
+        Nazwa punktu: <input name="name" required>
+        Szerokość geograficzna: <input type="number" name="lat" step="0.000001" min="-90" max="90" required>
+        Długość geograficzna: <input type="number" name="lon" step="0.000001" min="-180" max="180" required>
+        <button type="submit" class="btn">Dodaj punkt</button>
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
+
+    <table id="ptsTable" th:if="${points != null and !points.isEmpty()}">
+        <thead>
+        <tr><th>#</th><th>Nazwa</th><th>Szerokość</th><th>Długość</th></tr>
+        </thead>
+        <tbody>
+
+        <tr th:each="p, stat : ${points}"
+            th:classappend="${stat.index} >= 10 ? 'is-hidden' : ''"
+            th:attr="data-index=${stat.index},data-lat=${p.latitude},data-lon=${p.longitude},data-name=${p.name}">
+            <td th:text="${stat.count}">1</td>
+            <td th:text="${p.name}">Punkt</td>
+            <td th:text="${p.latitude}">0</td>
+            <td th:text="${p.longitude}">0</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${points == null or points.isEmpty()}" class="muted">Brak punktów – dodaj pierwszy powyżej.</p>
+
+    <div th:if="${points != null and points.size() > 10}" style="margin:.35rem 0;">
+        <button type="button" id="btnShowAllPts" class="btn">
+            Pokaż wszystkie punkty (<span th:text="${points.size()}">0</span>)
+        </button>
+        <button type="button" id="btnShowLessPts" class="btn" style="display:none">
+            Pokaż mniej
+        </button>
+        <span class="muted">Aktualnie widać 10 / <span th:text="${points.size()}">0</span></span>
+    </div>
+</div>
+
+<div class="section">
+    <h3>Mapa trasy</h3>
+    <div class="map-wrap"><div id="map"></div></div>
+</div>
 
 <p th:if="${ok}" th:text="${ok}" style="color:green;"></p>
+<p th:if="${err}" th:text="${err}" style="color:#b00;"></p>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+
+        var table = document.getElementById('ptsTable');
+        var showAllBtn = document.getElementById('btnShowAllPts');
+        var showLessBtn = document.getElementById('btnShowLessPts');
+
+        function hideOverflowRows() {
+            if (!table) return;
+            var rows = table.querySelectorAll('tbody tr');
+            rows.forEach(function(tr, idx){
+                if (idx >= 10) tr.classList.add('is-hidden');
+                else tr.classList.remove('is-hidden');
+            });
+        }
+        function showAllRows() {
+            if (!table) return;
+            var rows = table.querySelectorAll('tbody tr');
+            rows.forEach(function(tr){ tr.classList.remove('is-hidden'); });
+        }
+
+        if (showAllBtn && showLessBtn && table) {
+            showAllBtn.addEventListener('click', function(){
+                showAllRows();
+                showAllBtn.style.display = 'none';
+                showLessBtn.style.display = '';
+            });
+            showLessBtn.addEventListener('click', function(){
+                hideOverflowRows();
+                showLessBtn.style.display = 'none';
+                showAllBtn.style.display = '';
+            });
+        }
+
+
+        hideOverflowRows();
+
+
+        var pts = [];
+        if (table) {
+            var allRows = table.querySelectorAll('tbody tr[data-lat]');
+            allRows.forEach(function(tr){
+                var lat = parseFloat(tr.dataset.lat);
+                var lon = parseFloat(tr.dataset.lon);
+                var name = tr.dataset.name || '';
+                if (!isNaN(lat) && !isNaN(lon)) pts.push([lat, lon, name]);
+            });
+        }
+
+        var mapEl = document.getElementById('map');
+        if (!mapEl) return;
+
+        if (pts.length === 0) {
+            mapEl.innerHTML = 'Dodaj punkty, by narysować trasę.';
+            return;
+        }
+
+        var latlngs = pts.map(function(p){ return [p[0], p[1]]; });
+
+        var map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        var line = L.polyline(latlngs).addTo(map);
+        map.fitBounds(line.getBounds(), { padding:[20,20] });
+
+        latlngs.forEach(function(ll, i){
+            L.circleMarker(ll, { radius:4 }).addTo(map)
+                .bindPopup(String(pts[i][2] || ('Punkt ' + (i+1))));
+        });
+    });
+</script>
+
 </body>
 </html>
+

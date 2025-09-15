@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Rejestracja</title></head>
+<body>
+<h1>Rejestracja</h1>
+<p th:if="${ok}" th:text="${ok}" style="color:green"></p>
+<p th:if="${err}" th:text="${err}" style="color:red"></p>
+
+<form th:action="@{/ui/auth/register}" method="post">
+    Login: <input name="username" required><br>
+    Email: <input name="email" type="email" required><br>
+    Hasło: <input name="password" type="password" required><br>
+    <button type="submit">Utwórz konto</button>
+</form>
+
+<p><a th:href="@{/ui/auth/login}">Logowanie</a> | <a th:href="@{/ui/routes}">Powrót do tras</a></p>
+</body>
+</html>

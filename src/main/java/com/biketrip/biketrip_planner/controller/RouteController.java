@@ -110,5 +110,10 @@ public class RouteController {
             return ResponseEntity.ok(routeService.save(r));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @GetMapping("/{id}/calories")
+    public double calories(@PathVariable Long id, @RequestParam double weightKg) {
+        return routeService.calculateCalories(id, weightKg);
+    }
+
 }
 

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Logowanie</title></head>
+<body>
+<h1>Logowanie</h1>
+<p th:if="${ok}" th:text="${ok}" style="color:green"></p>
+<p th:if="${err}" th:text="${err}" style="color:red"></p>
+
+<form th:action="@{/ui/auth/login}" method="post">
+    <input type="hidden" name="next" th:value="${next}">
+    Email: <input name="email" type="email" required><br>
+    Hasło: <input name="password" type="password" required><br>
+    <button type="submit">Zaloguj</button>
+</form>
+
+<p>Nie masz konta? <a th:href="@{/ui/auth/register}">Rejestracja</a></p>
+<p><a th:href="@{/ui/routes}">Powrót do tras</a></p>
+</body>
+</html>

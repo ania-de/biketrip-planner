@@ -1,5 +1,6 @@
 package com.biketrip.biketrip_planner.service;
 
+import com.biketrip.biketrip_planner.classes.Difficulty;
 import com.biketrip.biketrip_planner.classes.Point;
 import com.biketrip.biketrip_planner.classes.Route;
 import com.biketrip.biketrip_planner.repository.PointRepository;
@@ -21,14 +22,13 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final double MET = 7.0 ;
+    private static final double MET = 7.0;
     @Value("${app.owm.api-key:}")
     private String apiKey;
 
 
-
-        private final ReviewRepository reviewRepository;
-        private final PointRepository pointRepository;
+    private final ReviewRepository reviewRepository;
+    private final PointRepository pointRepository;
 
     public RouteService(RouteRepository routeRepository, ReviewRepository reviewRepository, PointRepository pointRepository) {
         this.routeRepository = routeRepository;
@@ -45,7 +45,6 @@ public class RouteService {
     }
 
 
-
     public Route createRoute(@Valid Route route) {
         List<Point> points = route.getPoints();
         if (points != null) {
@@ -56,15 +55,17 @@ public class RouteService {
         }
         return routeRepository.save(route);
     }
+
     public Map<String, Object> getWeather(String city) {
         String url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + ",PL&appid=" + apiKey + "&units=metric";
         return restTemplate.getForObject(url, Map.class);
     }
 
 
-    public Optional<Route>  findById(Long id) {
+    public Optional<Route> findById(Long id) {
         return routeRepository.findById(id);
     }
+
     public List<Route> findByCity(String city) {
         return routeRepository.findByCity(city);
     }
@@ -72,12 +73,34 @@ public class RouteService {
     public void deleteById(Long id) {
         if (!routeRepository.existsById(id)) return;
         reviewRepository.deleteByRouteId(id);
-        pointRepository.deleteByRouteId(id);
+        pointRepository.deleteByRoute_Id(id);
         routeRepository.deleteById(id);
     }
 
     public List<Route> findAll() {
         return routeRepository.findAll();
     }
-    public Route save(Route r){ return routeRepository.save(r); }
+
+    public Route save(Route r) {
+        return routeRepository.save(r);
+    }
+
+    public List<Route> search(String city, Difficulty diff,
+                              Double minKm, Double maxKm, Double maxMin) {
+        return routeRepository.search(
+                (city == null || city.isBlank()) ? null : city,
+                diff, minKm, maxKm, maxMin
+        );
+    }
+    public List<Route> searchSimple(String city, Difficulty diff,
+                                    Double minKm, Double maxKm, Double maxMin) {
+        return routeRepository.findAll().stream()
+                .filter(r -> city == null || city.isBlank() || r.getCity().equalsIgnoreCase(city))
+                .filter(r -> diff == null || r.getDifficulty() == diff)
+                .filter(r -> minKm == null || r.getDistance() >= minKm)
+                .filter(r -> maxKm == null || r.getDistance() <= maxKm)
+                .filter(r -> maxMin == null || r.getDuration() <= maxMin) // duration = minuty
+                .toList();
+    }
+
 }
