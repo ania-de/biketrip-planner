@@ -25,4 +25,6 @@ public class Review {
     @JoinColumn(name = "route_id")
     private Route route;
 
+
+
 }

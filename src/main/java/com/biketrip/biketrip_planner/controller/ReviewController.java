@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/reviews")
@@ -58,8 +60,16 @@ public class ReviewController {
     }
 
     @GetMapping("/route/{routeId}/avg")
-    public double average(@PathVariable Long routeId) {
-        return reviewService.calculateAverageRating(routeId);
+    public Optional<Map<String, Object>> average(@PathVariable Long routeId) {
+        return routeService.findById(routeId)
+                .map(route -> Map.of(
+                        "route: ", route,
+                        "Średnia ocen: ", reviewService.calculateAverageRating(routeId)
+                ));
+
     }
 
 }
+
+
+

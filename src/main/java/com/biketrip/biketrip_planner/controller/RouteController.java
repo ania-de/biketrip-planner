@@ -17,7 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+
 
 @RestController
 @RequestMapping("/routes")
@@ -28,11 +31,13 @@ public class RouteController {
     private final ReviewService reviewService;
     private final WeatherService weatherService;
 
-    public RouteController(RouteService routeService, CategoryService categoryService, ReviewService reviewService,WeatherService weatherService) {
+
+    public RouteController(RouteService routeService, CategoryService categoryService, ReviewService reviewService, WeatherService weatherService) {
         this.routeService = routeService;
         this.categoryService = categoryService;
         this.reviewService = reviewService;
         this.weatherService = weatherService;
+
     }
 
     @PostMapping
@@ -98,8 +103,9 @@ public class RouteController {
     public void delete(@PathVariable Long id) {
         routeService.deleteById(id);
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Route> update(@PathVariable Long id, @RequestBody @Valid Route in){
+    public ResponseEntity<Route> update(@PathVariable Long id, @RequestBody @Valid Route in) {
         return routeService.findById(id).map(r -> {
             r.setName(in.getName());
             r.setCity(in.getCity());
@@ -110,10 +116,17 @@ public class RouteController {
             return ResponseEntity.ok(routeService.save(r));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @GetMapping("/{id}/calories")
-    public double calories(@PathVariable Long id, @RequestParam double weightKg) {
-        return routeService.calculateCalories(id, weightKg);
+    public Object calories(@PathVariable Long id, @RequestParam double weightKg) {
+        return routeService.findById(id)
+                .map(route -> Map.of(
+                        "route: ", route,
+                        "estimated_calorie : ", routeService.calculateCalories(id, weightKg)
+                ));
+
     }
+
 
 }
 

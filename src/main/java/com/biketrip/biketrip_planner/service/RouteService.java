@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +39,7 @@ public class RouteService {
 
     public double calculateCalories(Long routeId, double weightKg) {
         Route r = routeRepository.findById(routeId).orElseThrow();
-        double minutes = Math.max(0, r.getDuration()); // w encji przechowujesz minuty
+        double minutes = Math.max(0, r.getDuration());
         double hours = minutes / 60.0;
         double kcal = MET * weightKg * hours;
         return Math.round(kcal * 10.0) / 10.0;
@@ -99,8 +100,9 @@ public class RouteService {
                 .filter(r -> diff == null || r.getDifficulty() == diff)
                 .filter(r -> minKm == null || r.getDistance() >= minKm)
                 .filter(r -> maxKm == null || r.getDistance() <= maxKm)
-                .filter(r -> maxMin == null || r.getDuration() <= maxMin) // duration = minuty
+                .filter(r -> maxMin == null || r.getDuration() <= maxMin)
                 .toList();
     }
+
 
 }

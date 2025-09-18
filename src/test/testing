@@ -1,6 +1,30 @@
 
 ROUTES- post
 
+DEMKO:
+
+
+curl -X POST "http://localhost:8080/routes?includeWeather=true" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":"Trasa Demo",
+    "city":"Gdynia",
+    "difficulty":"EASY",
+    "distance":12.5,
+    "duration":60,
+    "categoryId":null,
+    "points":[
+      {"name":"Start","latitude":54.5189,"longitude":18.5305,"orderIndex":0},
+      {"name":"P2","latitude":54.5195,"longitude":18.5400,"orderIndex":1}
+    ]
+  }'
+----------
+  curl "http://localhost:8080/routes?city=Gdynia&includeWeather=false"
+-------------
+curl "http://localhost:8080/routes/12/calories?weightKg=80"
+
+
+
 curl -i -X POST 'http://localhost:8080/routes' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -28,7 +52,6 @@ curl -i 'http://localhost:8080/routes/1?includeWeather=true'
 
 Lista z pogodą:
 curl -i 'http://localhost:8080/routes?includeWeather=true'
-
 
 
 

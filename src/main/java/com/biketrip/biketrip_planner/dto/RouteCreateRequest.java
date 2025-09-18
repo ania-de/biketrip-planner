@@ -11,8 +11,8 @@ public record RouteCreateRequest(
         @NotBlank String name,
         @NotBlank String city,
         @NotNull Difficulty difficulty,
-        @DecimalMin("0.0") double distance,
-        @DecimalMin("0.0") double duration,
+        @DecimalMin("0.1") double distance,
+        @DecimalMin("0.1") double duration,
         Long categoryId,
         List<PointDTO> points
 ) {}

@@ -15,15 +15,15 @@ public class AuthService {
 
     public AuthService(UserRepository users) { this.users = users; }
 
-    public User register(String username, String email, String rawPassword, double weight) {
+    public User register(String username, String email, String rawPassword) {
         users.findByEmail(email).ifPresent(u -> { throw new IllegalArgumentException("Email zajęty"); });
         users.findByUsername(username).ifPresent(u -> { throw new IllegalArgumentException("Login zajęty"); });
 
         User u = new User();
         u.setUsername(username.trim());
         u.setEmail(email.trim().toLowerCase());
-        u.setPassword(encoder.encode(rawPassword)); // hash!
-        u.setWeight(weight);
+        u.setPassword(encoder.encode(rawPassword));
+        //u.setWeight(weight);
         return users.save(u);
     }
 

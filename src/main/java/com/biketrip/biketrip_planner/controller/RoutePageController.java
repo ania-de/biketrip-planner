@@ -46,9 +46,9 @@ public class RoutePageController {
     @GetMapping
     public String list(@RequestParam(required = false) String city,
                        @RequestParam(required = false) Difficulty difficulty,
-                       @RequestParam(required = false) Double minDistance,   // km
-                       @RequestParam(required = false) Double maxDistance,   // km
-                       @RequestParam(required = false) Double maxDuration,   // min
+                       @RequestParam(required = false) Double minDistance,
+                       @RequestParam(required = false) Double maxDistance,
+                       @RequestParam(required = false) Double maxDuration,
                        Model model) {
 
         boolean noFilters =

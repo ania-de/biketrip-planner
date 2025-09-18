@@ -43,11 +43,11 @@ public class AuthPageController {
     public String doRegister(@RequestParam String username,
                              @RequestParam String email,
                              @RequestParam String password,
-                             @RequestParam double weight,
+                             //@RequestParam double weight,
                              HttpSession session, RedirectAttributes ra) {
         try {
-            User u = auth.register(username, email, password, weight);
-            auth.login(email, password, session); // auto-login po rejestracji
+            User u = auth.register(username, email, password);
+            auth.login(email, password, session);
             ra.addFlashAttribute("ok", "Konto utworzone");
             return "redirect:/ui/routes";
         } catch (IllegalArgumentException ex) {

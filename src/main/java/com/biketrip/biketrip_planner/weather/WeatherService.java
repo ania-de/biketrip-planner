@@ -23,7 +23,7 @@ public class WeatherService {
 
 
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Missing key of OpenWeatherMap. Set OWM_API_KEY w Environment variables or app.owm.api-key.");
+            throw new IllegalStateException("Brakuje kucza. Ustaw OWM_API_KEY .");
         }
         this.owm = org.springframework.web.client.RestClient.builder().baseUrl(baseUrl).build();
         this.apiKey = apiKey;
@@ -42,17 +42,17 @@ public class WeatherService {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
-                            "City not found or bad request");
+                            "Nie znaleziono miasta");
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
                     throw new ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                            "Weather provider unavailable");
+                            "Pogoda niedostępna");
                 })
                 .body(OwmCurrentResponse.class);
 
         if (owmResp == null || owmResp.main() == null || owmResp.weather() == null || owmResp.weather().isEmpty()) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
-                    "Invalid weather response");
+                    "Błąd systemu");
         }
 
         var w = owmResp.weather().get(0);

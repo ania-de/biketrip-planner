@@ -13,7 +13,7 @@ public class RouteForm {
     @NotBlank private String city;
     @NotNull
     private Difficulty difficulty = Difficulty.EASY;
-    @DecimalMin("0.0") private double distance;     // km
-    @DecimalMin("0.0") private double durationMin;  // minuty
+    @DecimalMin("0.1") private double distance;
+    @DecimalMin("0.1") private double durationMin;
     private Long categoryId;
 }

@@ -24,8 +24,8 @@ public class User {
     private String email;
     @NotBlank(message = "Password cannot be empty")
     private String password;
-    @Min(value = 30, message = "Weight should be at least 30kg")
-    private double weight;
+    //@Min(value = 30, message = "Weight should be at least 30kg")
+    //private double weight;
 
     @ManyToMany(mappedBy = "users")
     private List<Route> routes = new ArrayList<>();
